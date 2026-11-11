@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+enum FormaPresente {
+  COMPRA
+  PIX
+}
+
+model Usuario {
+  id        String   @id @default(cuid())
+  usuario   String   @unique
+  senhaHash String
+  criadoEm  DateTime @default(now())
+}
+
+model Configuracao {
+  id                 Int      @id @default(1)
+  nomesCasal         String
+  fotoCasalUrl       String?
+  corPrimaria        String   @default("#B76E79")
+  corSecundaria      String   @default("#F5EFE6")
+  textoBoasVindas    String
+  textoAgradecimento String
+  textoPixAvulso     String
+  chavePix           String?
+  qrCodeUrl          String?
+  atualizadoEm       DateTime @updatedAt
+}
+
+model Categoria {
+  id        String     @id @default(cuid())
+  nome      String     @unique
+  ordem     Int
+  presentes Presente[]
+  criadoEm  DateTime   @default(now())
+}
+
+model Presente {
+  id            String         @id @default(cuid())
+  nome          String
+  descricao     String?
+  valorCentavos Int
+  fotoUrl       String?
+  categoriaId   String
+  categoria     Categoria      @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
+  links         LinkPresente[]
+  escolha       Escolha?
+  criadoEm      DateTime       @default(now())
+  atualizadoEm  DateTime       @updatedAt
+
+  @@index([categoriaId])
+}
+
+model LinkPresente {
+  id         String   @id @default(cuid())
+  presenteId String
+  presente   Presente @relation(fields: [presenteId], references: [id], onDelete: Cascade)
+  loja       String
+  url        String
+  ordem      Int      @default(0)
+
+  @@index([presenteId])
+}
+
+model Escolha {
+  id                    String        @id @default(cuid())
+  presenteId            String        @unique
+  presente              Presente      @relation(fields: [presenteId], references: [id], onDelete: Cascade)
+  forma                 FormaPresente
+  nomeConvidado         String
+  mensagem              String?
+  valorCentavos         Int
+  tokenCancelamentoHash String
+  pixRecebidoEm         DateTime?
+  itemCompradoEm        DateTime?
+  criadoEm              DateTime      @default(now())
+}
+
+model PixAvulso {
+  id            String    @id @default(cuid())
+  nomeConvidado String
+  valorCentavos Int
+  mensagem      String?
+  recebidoEm    DateTime?
+  criadoEm      DateTime  @default(now())
+}
