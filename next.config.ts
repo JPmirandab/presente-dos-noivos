@@ -5,9 +5,9 @@ const nextConfig: NextConfig = {
   experimental: {
     agentFeedback: true,
   },
-  cacheComponents: true,
-  partialPrefetching: true,
+  cacheComponents: false,
   reactCompiler: true,
+  allowedDevOrigins: ["192.168.1.121"],
   turbopack: {
     rules: {
       "*.css": {
